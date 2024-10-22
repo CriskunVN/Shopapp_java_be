@@ -21,7 +21,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@Entity(name = "UserEntity")
 @Table(name = "tbl_user")
 public class UserEntity extends AbstractEntity {
 

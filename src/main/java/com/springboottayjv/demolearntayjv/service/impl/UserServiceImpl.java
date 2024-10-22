@@ -7,6 +7,7 @@ import com.springboottayjv.demolearntayjv.dto.response.UserDetailResponse;
 import com.springboottayjv.demolearntayjv.exception.ResourceNotFoundException;
 import com.springboottayjv.demolearntayjv.model.AddressEntity;
 import com.springboottayjv.demolearntayjv.model.UserEntity;
+import com.springboottayjv.demolearntayjv.repository.SearchRepository;
 import com.springboottayjv.demolearntayjv.repository.UserRepository;
 import com.springboottayjv.demolearntayjv.service.UserService;
 import com.springboottayjv.demolearntayjv.util.UserStatus;
@@ -35,6 +36,9 @@ import java.util.regex.Pattern;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+
+    private final SearchRepository searchRepository;
+
     @Override
     public long saveUser(UserDTO request) {
         UserEntity user = UserEntity.builder()
@@ -208,6 +212,12 @@ public class UserServiceImpl implements UserService {
                 .totalPage(users.getTotalPages())
                 .items(response)
                 .build();
+
+    }
+
+    @Override
+    public PageResponse<?> getAllUserWithSortByColumnAndSearch(int pageNo, int pageSize, String search, String sortBy) {
+        return searchRepository.getAllUserWithSortByColumnAndSearch(pageNo,pageSize,search,sortBy);
 
     }
 

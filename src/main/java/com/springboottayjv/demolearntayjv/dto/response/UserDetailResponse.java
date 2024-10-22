@@ -7,6 +7,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
 public class UserDetailResponse implements Serializable {
     private Long id;
     private String firstName;
@@ -14,12 +15,6 @@ public class UserDetailResponse implements Serializable {
     private String phone;
     private String email;
 
-    public UserDetailResponse(Long id, String firstName, String lastName, String phone, String email) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phone = phone;
-        this.email = email;
-    }
+
 }
 
