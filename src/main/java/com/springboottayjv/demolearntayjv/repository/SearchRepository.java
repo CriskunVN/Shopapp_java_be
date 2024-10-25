@@ -1,9 +1,16 @@
 package com.springboottayjv.demolearntayjv.repository;
 
 import com.springboottayjv.demolearntayjv.dto.response.PageResponse;
+import com.springboottayjv.demolearntayjv.model.UserEntity;
+import com.springboottayjv.demolearntayjv.repository.criteria.SearchCriteria;
+import com.springboottayjv.demolearntayjv.repository.criteria.UserSearchCriteriaQueryConsumer;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -13,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,4 +89,68 @@ public class SearchRepository {
                 .build();
 
     }
+    public PageResponse advanceSearchUser(int pageNo, int pageSize, String sortBy, String... search) {
+
+        List<SearchCriteria> criteriaList = new ArrayList<>();
+
+        // 1. get list user
+        if(search != null) {
+                for(String searchi : search) {
+                    // firstName:value
+                    Pattern pattern = Pattern.compile("(\\w+?)([:><])(.*)");
+                    Matcher matcher = pattern.matcher(searchi);
+                    if(matcher.find()) {
+                        criteriaList.add(new SearchCriteria(matcher.group(1), matcher.group(2), matcher.group(3) ));
+                    }
+                }
+        }
+
+
+
+        // 2. get total record
+        List<UserEntity> users = getUsers(pageNo,  pageSize,criteriaList,sortBy);
+
+
+        Long totalElements = 1l;
+        return PageResponse.builder()
+                .page(pageNo)
+                .size(pageSize)
+                .totalPage(totalElements)
+                .items(users)
+                .build();
+
+    }
+
+    private List<UserEntity> getUsers(int pageNo, int pageSize, List<SearchCriteria> criteriaList, String sortBy) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> criteriaQuery = criteriaBuilder.createQuery(UserEntity.class);
+        Root<UserEntity> root = criteriaQuery.from(UserEntity.class);
+
+        // handle search conditions
+        Predicate predicate = criteriaBuilder.conjunction();
+        UserSearchCriteriaQueryConsumer queryConsumer = new UserSearchCriteriaQueryConsumer(criteriaBuilder,predicate,root);
+
+        criteriaList.forEach(queryConsumer);
+        predicate = queryConsumer.getPredicate();
+
+        criteriaQuery.where(predicate);
+        //handle sortBy
+        if(StringUtils.hasLength(sortBy)) {
+                // firstName:value
+                Pattern pattern = Pattern.compile("(\\w+?)(:)(asc|desc)");
+                Matcher matcher = pattern.matcher(sortBy);
+                if(matcher.find()) {
+                    String columnName = matcher.group(1);
+                    if(matcher.group(3).equalsIgnoreCase("desc")) {
+                        criteriaQuery.orderBy(criteriaBuilder.desc(root.get(columnName)));
+                    }
+                    else {
+                        criteriaQuery.orderBy(criteriaBuilder.asc(root.get(columnName)));
+                    }
+                }
+        }
+
+        return entityManager.createQuery(criteriaQuery).setFirstResult(pageNo).setMaxResults(pageSize).getResultList();
+    }
+
 }

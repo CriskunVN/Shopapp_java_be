@@ -221,6 +221,12 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public PageResponse<?> advanceSearchByCriteria(int pageNo, int pageSize, String sortBy, String... search) {
+
+        return searchRepository.advanceSearchUser(pageNo,pageSize,sortBy,search);
+    }
+
     public UserType convertToEntity(UserDTO userDTO) {
         UserEntity userEntity = new UserEntity();
         userEntity.setType(UserType.valueOf(userDTO.getType().toUpperCase())); // Chuyển chuỗi sang enum

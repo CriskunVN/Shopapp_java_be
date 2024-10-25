@@ -136,6 +136,14 @@ public class UserController {
         return new ResponseData<>(HttpStatus.OK.value(), "users", userService.getAllUserWithSortByColumnAndSearch(pageNo, pageSize, search, sortBy));
     }
 
-
+    @Operation(summary = "Get list of users with sort column and search", description = "Send a request via this API to get user list by pageNo and pageSize and with sort by column and search")
+    @GetMapping("/advance-search-by-criteria")
+    public ResponseData<?> advanceSearchByCriteria(@RequestParam(defaultValue = "0", required = false) int pageNo,
+                                                               @RequestParam(defaultValue = "20", required = false) int pageSize,
+                                                               @RequestParam(defaultValue = "",required = false) String sortBy,
+                                                               @RequestParam(defaultValue = "",required = false) String... search) {
+        log.info("Request advance search with criteria paging and sorting");
+        return new ResponseData<>(HttpStatus.OK.value(), "users", userService.advanceSearchByCriteria(pageNo, pageSize, sortBy, search));
+    }
 
 }
