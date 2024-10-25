@@ -222,9 +222,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PageResponse<?> advanceSearchByCriteria(int pageNo, int pageSize, String sortBy, String... search) {
+    public PageResponse<?> advanceSearchByCriteria(int pageNo, int pageSize, String sortBy, String address ,String... search) {
 
-        return searchRepository.advanceSearchUser(pageNo,pageSize,sortBy,search);
+        return searchRepository.advanceSearchUser(pageNo,pageSize,sortBy,address,search);
     }
 
     public UserType convertToEntity(UserDTO userDTO) {

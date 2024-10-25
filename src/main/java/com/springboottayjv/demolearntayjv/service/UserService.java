@@ -24,7 +24,7 @@ public interface UserService{
 
     PageResponse<?> getAllUserWithSortByColumnAndSearch(int pageNo, int pageSize,String search,String sortBy);
 
-    PageResponse<?> advanceSearchByCriteria(int pageNo, int pageSize, String sortBy, String... search);
+    PageResponse<?> advanceSearchByCriteria(int pageNo, int pageSize, String sortBy,String address , String... search);
 
     //    PageResponse<?> advanceSearchWithSpecifications(Pageable pageable, String[] user, String[] address);
 }

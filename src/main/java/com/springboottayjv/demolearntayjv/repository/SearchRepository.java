@@ -1,16 +1,14 @@
 package com.springboottayjv.demolearntayjv.repository;
 
 import com.springboottayjv.demolearntayjv.dto.response.PageResponse;
+import com.springboottayjv.demolearntayjv.model.AddressEntity;
 import com.springboottayjv.demolearntayjv.model.UserEntity;
 import com.springboottayjv.demolearntayjv.repository.criteria.SearchCriteria;
 import com.springboottayjv.demolearntayjv.repository.criteria.UserSearchCriteriaQueryConsumer;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -89,7 +87,7 @@ public class SearchRepository {
                 .build();
 
     }
-    public PageResponse advanceSearchUser(int pageNo, int pageSize, String sortBy, String... search) {
+    public PageResponse advanceSearchUser(int pageNo, int pageSize, String sortBy, String address ,String... search) {
 
         List<SearchCriteria> criteriaList = new ArrayList<>();
 
@@ -108,20 +106,22 @@ public class SearchRepository {
 
 
         // 2. get total record
-        List<UserEntity> users = getUsers(pageNo,  pageSize,criteriaList,sortBy);
+        List<UserEntity> users = getUsers(pageNo,pageSize,criteriaList,sortBy,address);
 
 
-        Long totalElements = 1l;
+        Long totalElements = getTotalElement(criteriaList,address);
         return PageResponse.builder()
-                .page(pageNo)
-                .size(pageSize)
-                .totalPage(totalElements)
+                .page(pageNo) // offset = index of record
+                .size(pageSize) // sizes of record
+                .totalPage(totalElements.intValue()) //total element
                 .items(users)
                 .build();
 
     }
 
-    private List<UserEntity> getUsers(int pageNo, int pageSize, List<SearchCriteria> criteriaList, String sortBy) {
+
+
+    private List<UserEntity> getUsers(int pageNo, int pageSize, List<SearchCriteria> criteriaList, String sortBy , String address) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<UserEntity> criteriaQuery = criteriaBuilder.createQuery(UserEntity.class);
         Root<UserEntity> root = criteriaQuery.from(UserEntity.class);
@@ -130,10 +130,18 @@ public class SearchRepository {
         Predicate predicate = criteriaBuilder.conjunction();
         UserSearchCriteriaQueryConsumer queryConsumer = new UserSearchCriteriaQueryConsumer(criteriaBuilder,predicate,root);
 
-        criteriaList.forEach(queryConsumer);
-        predicate = queryConsumer.getPredicate();
+        if(StringUtils.hasLength(address)) {
+            Join<AddressEntity,UserEntity> addressUserJoin = root.join("addresses");
+            Predicate addressPredicate = criteriaBuilder.like(addressUserJoin.get("city"), "%" + address + "%");
+            // search for all field of address
+            criteriaQuery.where(predicate,addressPredicate);
+        }
+        else {
+            criteriaList.forEach(queryConsumer);
+            predicate = queryConsumer.getPredicate();
+            criteriaQuery.where(predicate);
+        }
 
-        criteriaQuery.where(predicate);
         //handle sortBy
         if(StringUtils.hasLength(sortBy)) {
                 // firstName:value
@@ -151,6 +159,32 @@ public class SearchRepository {
         }
 
         return entityManager.createQuery(criteriaQuery).setFirstResult(pageNo).setMaxResults(pageSize).getResultList();
+    }
+
+
+    private Long getTotalElement(List<SearchCriteria> criteriaList, String address) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+        Root<UserEntity> root = criteriaQuery.from(UserEntity.class);
+
+        // handle search conditions
+        Predicate predicate = criteriaBuilder.conjunction();
+        UserSearchCriteriaQueryConsumer queryConsumer = new UserSearchCriteriaQueryConsumer(criteriaBuilder,predicate,root);
+
+        if(StringUtils.hasLength(address)) {
+            Join<AddressEntity,UserEntity> addressUserJoin = root.join("addresses");
+            Predicate addressPredicate = criteriaBuilder.like(addressUserJoin.get("city"), "%" + address + "%");
+            // search for all field of address
+            criteriaQuery.select(criteriaBuilder.count(root));
+            criteriaQuery.where(predicate,addressPredicate);
+        }
+        else {
+            criteriaList.forEach(queryConsumer);
+            predicate = queryConsumer.getPredicate();
+            criteriaQuery.select(criteriaBuilder.count(root));
+            criteriaQuery.where(predicate);
+        }
+        return entityManager.createQuery(criteriaQuery).getSingleResult();
     }
 
 }
