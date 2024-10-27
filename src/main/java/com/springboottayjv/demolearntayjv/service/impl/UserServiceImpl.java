@@ -9,7 +9,10 @@ import com.springboottayjv.demolearntayjv.model.AddressEntity;
 import com.springboottayjv.demolearntayjv.model.UserEntity;
 import com.springboottayjv.demolearntayjv.repository.SearchRepository;
 import com.springboottayjv.demolearntayjv.repository.UserRepository;
+import com.springboottayjv.demolearntayjv.repository.specification.UserSpec;
+import com.springboottayjv.demolearntayjv.repository.specification.UserSpecificationsBuilder;
 import com.springboottayjv.demolearntayjv.service.UserService;
+import com.springboottayjv.demolearntayjv.util.Gender;
 import com.springboottayjv.demolearntayjv.util.UserStatus;
 import com.springboottayjv.demolearntayjv.util.UserType;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +22,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -227,11 +228,43 @@ public class UserServiceImpl implements UserService {
         return searchRepository.advanceSearchUser(pageNo,pageSize,sortBy,address,search);
     }
 
+    @Override
+    public PageResponse<?> advanceSearchWithSpecifications(Pageable pageable, String[] user, String[] address) {
+
+
+        if(user != null && address.length != 0) {
+            // search in table user and address => join table
+            return searchRepository.getUserJoinedAddress(pageable, user, address);
+        }
+        else if(user != null){
+            // search in table user => don't need join with table address
+            UserSpecificationsBuilder builder = new UserSpecificationsBuilder();
+
+            for(String s: user) {
+                Pattern pattern = Pattern.compile("(\\w+?)([:<>~!])(.*)(\\p{Punct}?)(.*)(\\p{Punct}?)");
+                Matcher matcher = pattern.matcher(s);
+                if(matcher.find()) {
+                    builder.with(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(5));
+                }
+            }
+            Page<UserEntity> users = userRepository.findAll(Objects.requireNonNull(builder.build()), pageable);
+
+            return convertToPageResponse(users,pageable);
+        }
+
+
+        return convertToPageResponse(userRepository.findAll(pageable), pageable);
+
+    }
+
+
     public UserType convertToEntity(UserDTO userDTO) {
         UserEntity userEntity = new UserEntity();
         userEntity.setType(UserType.valueOf(userDTO.getType().toUpperCase())); // Chuyển chuỗi sang enum
         return userEntity.getType();
     }
+
+
     public UserStatus convertStatusToEntity(UserDTO userDTO) {
         UserEntity userEntity = new UserEntity();
         userEntity.setStatus(UserStatus.valueOf(userDTO.getStatus().toString())); // Chuyển chuỗi sang enum
@@ -254,6 +287,30 @@ public class UserServiceImpl implements UserService {
                         .build())
         );
         return result;
+    }
+
+
+    /**
+     * Convert Page<User> to PageResponse
+     *
+     * @param users
+     * @param pageable
+     * @return
+     */
+    private PageResponse<?> convertToPageResponse(Page<UserEntity> users, Pageable pageable) {
+        List<UserDetailResponse> response = users.stream().map(user -> UserDetailResponse.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .build()).toList();
+        return PageResponse.builder()
+                .page(pageable.getPageNumber())
+                .size(pageable.getPageSize())
+                .totalPage(users.getTotalPages())
+                .items(response)
+                .build();
     }
 
 }

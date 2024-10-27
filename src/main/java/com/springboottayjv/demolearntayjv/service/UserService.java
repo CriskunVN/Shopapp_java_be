@@ -4,6 +4,7 @@ import com.springboottayjv.demolearntayjv.dto.request.UserDTO;
 import com.springboottayjv.demolearntayjv.dto.response.PageResponse;
 import com.springboottayjv.demolearntayjv.dto.response.UserDetailResponse;
 import com.springboottayjv.demolearntayjv.util.UserStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,5 +27,5 @@ public interface UserService{
 
     PageResponse<?> advanceSearchByCriteria(int pageNo, int pageSize, String sortBy,String address , String... search);
 
-    //    PageResponse<?> advanceSearchWithSpecifications(Pageable pageable, String[] user, String[] address);
+    PageResponse<?> advanceSearchWithSpecifications(Pageable pageable, String[] user, String[] address);
 }

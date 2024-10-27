@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -136,7 +137,7 @@ public class UserController {
         return new ResponseData<>(HttpStatus.OK.value(), "users", userService.getAllUserWithSortByColumnAndSearch(pageNo, pageSize, search, sortBy));
     }
 
-    @Operation(summary = "Get list of users with sort column and search", description = "Send a request via this API to get user list by pageNo and pageSize and with sort by column and search")
+    @Operation(summary = "Get list of users with sort column and search", description = "Send a request via this API to get user list by pageNo and pageSize and with sort by multiple column")
     @GetMapping("/advance-search-by-criteria")
     public ResponseData<?> advanceSearchByCriteria(@RequestParam(defaultValue = "0", required = false) int pageNo,
                                                                @RequestParam(defaultValue = "20", required = false) int pageSize,
@@ -145,6 +146,16 @@ public class UserController {
                                                                @RequestParam(defaultValue = "",required = false) String... search) {
         log.info("Request advance search with criteria paging and sorting");
         return new ResponseData<>(HttpStatus.OK.value(), "users", userService.advanceSearchByCriteria(pageNo, pageSize, sortBy,address ,search));
+    }
+
+    @Operation(summary = "Advance search query by specification", description = "Send a request via this API to get user list by pageNo and search with user and address")
+    @GetMapping("/advance-search-with-specification")
+    public ResponseData<?> advanceSearchWithSpecification(Pageable pageable,
+                                                          @RequestParam(defaultValue = "",required = false) String[] user,
+                                                          @RequestParam(defaultValue = "",required = false) String[] address) {
+        log.info("Request advance search with specification");
+
+        return new ResponseData<>(HttpStatus.OK.value(), "users", userService.advanceSearchWithSpecifications(pageable,user,address));
     }
 
 }
