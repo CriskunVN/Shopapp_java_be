@@ -7,6 +7,7 @@ import com.springboottayjv.demolearntayjv.dto.response.ResponseError;
 import com.springboottayjv.demolearntayjv.dto.response.UserDetailResponse;
 import com.springboottayjv.demolearntayjv.exception.ResourceNotFoundException;
 import com.springboottayjv.demolearntayjv.service.UserService;
+import com.springboottayjv.demolearntayjv.util.Gender;
 import com.springboottayjv.demolearntayjv.util.UserStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,9 +16,12 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 @RestController
 @RequestMapping("/user")
@@ -47,11 +51,11 @@ public class UserController {
     }
 
 
-
     @GetMapping("/id")
     public ResponseData<UserDTO> getUserById(@Min(1) Long id) {
         return new ResponseData<>(HttpStatus.ACCEPTED.value(),Translator.toLocale("user.add.success"));
     }
+
 
 
     @Operation(summary = "Update user", description = "Send a request via this API to update user")
@@ -68,6 +72,7 @@ public class UserController {
         }
     }
 
+
     @Operation(summary = "Change status of user", description = "Send a request via this API to change status of user")
     @PatchMapping("/{userId}")
     public ResponseData<?> updateStatus(@Min(1) @PathVariable int userId, @RequestParam UserStatus status) {
@@ -81,6 +86,7 @@ public class UserController {
             return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Change status fail");
         }
     }
+
 
     @Operation(summary = "Delete user permanently", description = "Send a request via this API to delete user permanently")
     @DeleteMapping("/{userId}")
@@ -96,6 +102,7 @@ public class UserController {
         }
     }
 
+
     @Operation(summary = "Get user detail", description = "Send a request via this API to get user information")
     @GetMapping("/{userId}")
     public ResponseData<UserDetailResponse> getUser(@PathVariable @Min(1) long userId) {
@@ -108,6 +115,7 @@ public class UserController {
         }
     }
 
+
     @Operation(summary = "Get list of users per pageNo", description = "Send a request via this API to get user list by pageNo and pageSize")
     @GetMapping("/list")
     public ResponseData<?> getAllUsers(@RequestParam(defaultValue = "0", required = false) int pageNo,
@@ -116,6 +124,7 @@ public class UserController {
         log.info("Request get all of users");
         return new ResponseData<>(HttpStatus.OK.value(), "users", userService.getAllUsers(pageNo,pageSize , sortBy));
     }
+
 
     @Operation(summary = "Get list of users with sort by multiple column", description = "Send a request via this API to get user list by pageNo and pageSize and with sort by multiple column")
     @GetMapping("/list-with-sort-by-multiple-columns")
@@ -137,6 +146,7 @@ public class UserController {
         return new ResponseData<>(HttpStatus.OK.value(), "users", userService.getAllUserWithSortByColumnAndSearch(pageNo, pageSize, search, sortBy));
     }
 
+
     @Operation(summary = "Get list of users with sort column and search", description = "Send a request via this API to get user list by pageNo and pageSize and with sort by multiple column")
     @GetMapping("/advance-search-by-criteria")
     public ResponseData<?> advanceSearchByCriteria(@RequestParam(defaultValue = "0", required = false) int pageNo,
@@ -148,6 +158,7 @@ public class UserController {
         return new ResponseData<>(HttpStatus.OK.value(), "users", userService.advanceSearchByCriteria(pageNo, pageSize, sortBy,address ,search));
     }
 
+
     @Operation(summary = "Advance search query by specification", description = "Send a request via this API to get user list by pageNo and search with user and address")
     @GetMapping("/advance-search-with-specification")
     public ResponseData<?> advanceSearchWithSpecification(Pageable pageable,
@@ -156,6 +167,92 @@ public class UserController {
         log.info("Request advance search with specification");
 
         return new ResponseData<>(HttpStatus.OK.value(), "users", userService.advanceSearchWithSpecifications(pageable,user,address));
+    }
+
+
+    @Operation(summary = "Get list users with first name", description = "Send a request via this API to get list user with first name")
+    @GetMapping("/get-user-by-firstName-like")
+    public ResponseData<?> getListUserByFirstNameLike(
+            @RequestParam(defaultValue = "",required = false) String name
+            ){
+        log.info("Request get list users with first name");
+        return new ResponseData<>(HttpStatus.OK.value(),"users",userService.getUserByFirstNameLike(name));
+    }
+
+    @Operation(summary = "Get list users by city" ,description = "Send a request via this API to get list user by city")
+    @GetMapping("/get-user-by-city")
+    public ResponseData<?> getListUserByCity(
+            @RequestParam(defaultValue = "",required = false) String city
+    ) {
+
+        return new ResponseData<>(HttpStatus.OK.value(), "users",userService.getListUserByCity(city));
+    }
+
+    @Operation(summary = "Get list users by created at between" ,description = "Send a request via this API to get list user by created at between")
+    @GetMapping("/get-user-by-createdat-between")
+    public ResponseData<?> getListUsersByCreatedAtBetween(
+            @RequestParam(defaultValue = "",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date start,
+            @RequestParam(defaultValue = "",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date end
+    ) {
+
+        return new ResponseData<>(HttpStatus.OK.value(), "users",userService.getListUsersByCreatedAtBetween(start,end));
+    }
+
+    @Operation(summary = "Get list users by firstName and lastName" ,description = "Send a request via this API to get list user by firstName and lastName")
+    @GetMapping("/get-user-by-firstname-and-lastname")
+    public ResponseData<?> getListUsersByFirstNameAndLastName(
+            @RequestParam(defaultValue = "",required = false) String firstName,
+            @RequestParam(defaultValue = "",required = false) String lastName
+    ) {
+
+        return new ResponseData<>(HttpStatus.OK.value(), "users",userService.getListUsersByFirstNameAndLastName(firstName,lastName));
+    }
+
+    @Operation(summary = "Get list users by email" ,description = "Send a request via this API to get list user by email")
+    @GetMapping("/get-user-by-email")
+    public ResponseData<?> getListUsersByEmail(
+            @RequestParam(defaultValue = "",required = false) String email
+    ) {
+
+        return new ResponseData<>(HttpStatus.OK.value(), "users",userService.getListUsersByEmail(email));
+    }
+
+    @Operation(summary = "Get list users by age less than" ,description = "Send a request via this API to get list user by age less than")
+    @GetMapping("/get-user-by-age-less-than")
+    public ResponseData<?> getListUsersByAgeLessThan(
+            @RequestParam(defaultValue = "",required = false) int age
+    ) {
+
+        return new ResponseData<>(HttpStatus.OK.value(), "users",userService.getListUsersByAgeLessThan(age));
+    }
+
+
+    @Operation(summary = "Get list users by age greater than" ,description = "Send a request via this API to get list user by age greater than")
+    @GetMapping("/get-user-by-age-greater-than")
+    public ResponseData<?> getListUsersByAgeGreaterThan(
+            @RequestParam(defaultValue = "",required = false) int age
+    ) {
+
+        return new ResponseData<>(HttpStatus.OK.value(), "users",userService.getListUsersByAgeGreaterThan(age));
+    }
+
+
+    @Operation(summary = "Get list users by created at after" ,description = "Send a request via this API to get list user by created at after")
+    @GetMapping("/get-user-by-created_at_after")
+    public ResponseData<?> getUsersByCreatedAtAfter(
+            @RequestParam(defaultValue = "",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date date
+    ) {
+
+        return new ResponseData<>(HttpStatus.OK.value(), "users",userService.getUsersByCreatedAtAfter(date));
+    }
+
+    @Operation(summary = "Get list users by created at before" ,description = "Send a request via this API to get list user by created at before")
+    @GetMapping("/get-user-by-created_at_before")
+    public ResponseData<?> getUsersByCreatedAtBefore(
+            @RequestParam(defaultValue = "",required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date date
+    ) {
+
+        return new ResponseData<>(HttpStatus.OK.value(), "users",userService.getUsersByCreatedAtBefore(date));
     }
 
 }

@@ -12,7 +12,6 @@ import lombok.*;
 @Table(name = "tbl_address")
 public class AddressEntity extends AbstractEntity {
 
-
     @Column(name = "apartment_number")
     private String apartmentNumber;
 

@@ -257,6 +257,55 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public List<UserEntity> getUserByFirstNameLike(String name) {
+        name = "%" + name + "%";
+        return userRepository.findByFirstNameLike(name);
+
+    }
+
+    @Override
+    public List<UserEntity> getListUserByCity(String city) {
+
+        return userRepository.getListUserByCity(city);
+    }
+
+    @Override
+    public List<UserEntity> getUsersByCreatedAtBefore(Date date) {
+        return userRepository.findByCreatedAtBefore(date);
+    }
+
+    @Override
+    public List<UserEntity> getUsersByCreatedAtAfter(Date date) {
+        return userRepository.findByCreatedAtAfter(date);
+    }
+
+    @Override
+    public List<UserEntity> getListUsersByAgeGreaterThan(int age) {
+        return userRepository.findByAgeGreaterThan(age);
+    }
+
+    @Override
+    public List<UserEntity> getListUsersByCreatedAtBetween(Date start,Date end) {
+
+        return userRepository.findByCreatedAtBetween(start,end);
+
+    }
+
+    @Override
+    public List<UserEntity> getListUsersByFirstNameAndLastName(String firstName, String lastName) {
+        return userRepository.getListUserDistinctByFirstNameAndLastName(firstName,lastName);
+    }
+
+    @Override
+    public List<UserEntity> getListUsersByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public List<UserEntity> getListUsersByAgeLessThan(int age) {
+        return userRepository.findByAgeLessThan(age);
+    }
 
     public UserType convertToEntity(UserDTO userDTO) {
         UserEntity userEntity = new UserEntity();

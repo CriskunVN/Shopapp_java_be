@@ -1,5 +1,6 @@
 package com.springboottayjv.demolearntayjv.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
