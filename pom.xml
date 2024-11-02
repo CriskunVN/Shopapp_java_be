@@ -8,10 +8,11 @@
 		<version>3.3.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.Spring-boot-tayjv</groupId>
-	<artifactId>demoLearnTayJV</artifactId>
+	<groupId>com.shopapp</groupId>
+	<artifactId>demoShop-app-java</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>demoLearnTayJV</name>
+	<name>shopapp-java</name>
+	<packaging>jar</packaging>
 	<description>demoLearnTayJV</description>
 	<url/>
 	<licenses>
@@ -28,12 +29,18 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
+
+
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -112,7 +119,9 @@
 						</exclude>
 					</excludes>
 				</configuration>
+
 			</plugin>
+
 		</plugins>
 	</build>
 

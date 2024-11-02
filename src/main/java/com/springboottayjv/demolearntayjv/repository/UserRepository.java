@@ -18,7 +18,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> , JpaSpe
     @Query(value = "select u from UserEntity u inner join AddressEntity a on u.id = a.user.id where a.city = ?1")
     List<UserEntity> getListUserByCity(String city);
 
-    List<UserEntity> findByGender(Gender gender);
 
     // -- distinct
     @Query(value = "select distinct u from UserEntity u WHERE u.firstName= ?1 AND u.lastName= ?2")
