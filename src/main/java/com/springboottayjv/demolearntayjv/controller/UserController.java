@@ -11,6 +11,7 @@ import com.springboottayjv.demolearntayjv.util.Gender;
 import com.springboottayjv.demolearntayjv.util.UserStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Date;
 
 @RestController
@@ -36,8 +38,6 @@ public class UserController {
     @Operation(method = "POST", summary = "Add new user", description = "Send a request via this API to create new user")
     @PostMapping("/")
     public ResponseData<Long> addUser(@Validated @RequestBody UserDTO user) {
-        log.info("Request add user, {} {}", user.getFirstName(), user.getLastName());
-
         try {
             long userId = userService.saveUser(user);
             log.info("Request add user, {} {}", userId,user.getFirstName());
@@ -87,6 +87,23 @@ public class UserController {
         }
     }
 
+    @GetMapping("/confirm/{userId}")
+    public ResponseData<?> confirmUser(@Min(1) @PathVariable int userId, @RequestParam String secretCode, HttpServletResponse response) throws IOException {
+        log.info("Confirm user userId={} , secretCode={}", userId,secretCode);
+
+
+        try {
+            userService.confirmUser(userId, secretCode);
+            return new ResponseData<>(HttpStatus.ACCEPTED.value(),"User confirm ");
+        } catch (Exception e) {
+            log.error("errorMessage={}", e.getMessage(), e.getCause());
+            return new ResponseError(HttpStatus.BAD_REQUEST.value(), "Confirmation was failure");
+        }
+        finally {
+            // sau khi confirm sẽ chuyển sang page login
+                response.sendRedirect("https://cosplaytele.com/eula-12/");
+        }
+    }
 
     @Operation(summary = "Delete user permanently", description = "Send a request via this API to delete user permanently")
     @DeleteMapping("/{userId}")

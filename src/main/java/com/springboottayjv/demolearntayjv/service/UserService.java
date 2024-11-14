@@ -6,15 +6,17 @@ import com.springboottayjv.demolearntayjv.dto.response.UserDetailResponse;
 import com.springboottayjv.demolearntayjv.model.UserEntity;
 import com.springboottayjv.demolearntayjv.util.Gender;
 import com.springboottayjv.demolearntayjv.util.UserStatus;
+import jakarta.mail.MessagingException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.List;
 
 @Service
 public interface UserService{
-    long saveUser(UserDTO request);
+    long saveUser(UserDTO request) throws MessagingException, UnsupportedEncodingException;
 
     void updateUser(long userId, UserDTO request);
 
@@ -51,4 +53,6 @@ public interface UserService{
     List<UserEntity> getUsersByCreatedAtAfter(Date date);
 
     List<UserEntity> getUsersByCreatedAtBefore(Date date);
+
+    void confirmUser(int userId, String secretCode);
 }

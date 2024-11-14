@@ -11,10 +11,12 @@ import com.springboottayjv.demolearntayjv.repository.SearchRepository;
 import com.springboottayjv.demolearntayjv.repository.UserRepository;
 import com.springboottayjv.demolearntayjv.repository.specification.UserSpec;
 import com.springboottayjv.demolearntayjv.repository.specification.UserSpecificationsBuilder;
+import com.springboottayjv.demolearntayjv.service.EmailService;
 import com.springboottayjv.demolearntayjv.service.UserService;
 import com.springboottayjv.demolearntayjv.util.Gender;
 import com.springboottayjv.demolearntayjv.util.UserStatus;
 import com.springboottayjv.demolearntayjv.util.UserType;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,6 +28,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,8 +43,11 @@ public class UserServiceImpl implements UserService {
 
     private final SearchRepository searchRepository;
 
+    private final EmailService emailService;
+
+
     @Override
-    public long saveUser(UserDTO request) {
+    public long saveUser(UserDTO request) throws MessagingException, UnsupportedEncodingException {
         UserEntity user = UserEntity.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -68,8 +74,13 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
 
+        if(user.getId() != null) {
+            emailService.sendConfirmLink(user.getEmail(),user.getId(),"secretCode");
+
+        }
 
         log.info("User has save!");
+
         return user.getId();
            }
 
@@ -273,6 +284,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserEntity> getUsersByCreatedAtBefore(Date date) {
         return userRepository.findByCreatedAtBefore(date);
+    }
+
+    @Override
+    public void confirmUser(int userId, String secretCode) {
+        log.info("Confirmed!");
     }
 
     @Override
